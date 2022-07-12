@@ -243,7 +243,6 @@ namespace UnityEngine.Rendering.Universal
         /// <inheritdoc />
         public override void Setup(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            PortalRenderType portalType = cameraData.camera.GetComponent<UniversalAdditionalCameraData>().portalType; // Portal change
 #if ADAPTIVE_PERFORMANCE_2_1_0_OR_NEWER
             bool needTransparencyPass = !UniversalRenderPipeline.asset.useAdaptivePerformance || !AdaptivePerformance.AdaptivePerformanceRenderSettings.SkipTransparentObjects;
 #endif
@@ -461,6 +460,8 @@ namespace UnityEngine.Rendering.Universal
             if (camera.clearFlags == CameraClearFlags.Skybox && (RenderSettings.skybox != null || cameraSkybox?.material != null) && !isOverlayCamera)
                 EnqueuePass(m_DrawSkyboxPass);
 
+            PortalRenderType portalType = cameraData.camera.GetComponent<UniversalAdditionalCameraData>().portalType; // Portal change
+
             if (portalType == PortalRenderType.ForceDrawDepthAndColor || portalType == PortalRenderType.ForceDrawDepth || requiresDepthCopyPass) // Portal change
             {
                 m_CopyDepthPass.Setup(m_ActiveCameraDepthAttachment, m_DepthTexture);
@@ -473,7 +474,7 @@ namespace UnityEngine.Rendering.Universal
                 Shader.SetGlobalTexture(m_DepthTexture.id, SystemInfo.usesReversedZBuffer ? Texture2D.blackTexture : Texture2D.whiteTexture);
             }
 
-            if (portalType == PortalRenderType.ForceDrawDepthAndColor || portalType == PortalRenderType.ForceDrawColor || copyColorPass)
+            if (portalType == PortalRenderType.ForceDrawDepthAndColor || portalType == PortalRenderType.ForceDrawColor || copyColorPass) // Portal change
             {
                 // TODO: Downsampling method should be store in the renderer instead of in the asset.
                 // We need to migrate this data to renderer. For now, we query the method in the active asset.
