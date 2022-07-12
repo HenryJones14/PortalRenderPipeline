@@ -33,6 +33,7 @@ namespace UnityEditor.Rendering.Universal
 
             public static GUIContent backgroundType = EditorGUIUtility.TrTextContent("Background Type", "Controls how to initialize the Camera's background.\n\nSkybox initializes camera with Skybox, defaulting to a background color if no skybox is found.\n\nSolid Color initializes background with the background color.\n\nUninitialized has undefined values for the camera background. Use this only if you are rendering all pixels in the Camera's view.");
             public static GUIContent cameraType = EditorGUIUtility.TrTextContent("Render Type", "Controls which type of camera this is.");
+            public static GUIContent portalState = EditorGUIUtility.TrTextContent("Portal Type", "Sets portal pass index.");
             public static GUIContent renderingShadows = EditorGUIUtility.TrTextContent("Render Shadows", "Makes this camera render shadows.");
             public static GUIContent requireDepthTexture = EditorGUIUtility.TrTextContent("Depth Texture", "On makes this camera create a _CameraDepthTexture, which is a copy of the rendered depth values.\nOff makes the camera not create a depth texture.\nUse Pipeline Settings applies settings from the Render Pipeline Asset.");
             public static GUIContent requireOpaqueTexture = EditorGUIUtility.TrTextContent("Opaque Texture", "On makes this camera create a _CameraOpaqueTexture, which is a copy of the rendered view.\nOff makes the camera not create an opaque texture.\nUse Pipeline Settings applies settings from the Render Pipeline Asset.");
@@ -676,7 +677,7 @@ namespace UnityEditor.Rendering.Universal
         void DrawPortalType()
         {
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_AdditionalCameraDataPortalState, Styles.cameraType);
+            EditorGUILayout.PropertyField(m_AdditionalCameraDataPortalState, Styles.portalState);
         }
 
         void DrawClearFlags()
