@@ -64,6 +64,41 @@ namespace UnityEngine.Rendering.Universal
     }
 
     /// <summary>
+    /// Holds information about the portal render type for a camera.
+    /// </summary>
+    public enum PortalRenderType
+    {
+        0 = None;
+        Main_OpaquePass,
+
+        BP_OpaquePass1,
+        BP_OpaquePass2,
+        BP_OpaquePass3,
+        BP_OpaquePass4,
+        BP_OpaquePass5,
+
+        BP_TransparentPass5,
+        BP_TransparentPass4,
+        BP_TransparentPass3,
+        BP_TransparentPass2,
+        BP_TransparentPass1,
+
+        OP_OpaquePass1,
+        OP_OpaquePass2,
+        OP_OpaquePass3,
+        OP_OpaquePass4,
+        OP_OpaquePass5,
+
+        OP_TransparentPass5,
+        OP_TransparentPass4,
+        OP_TransparentPass3,
+        OP_TransparentPass2,
+        OP_TransparentPass1,
+
+        Main_TransparentPass,
+    }
+
+    /// <summary>
     /// Controls SMAA anti-aliasing quality.
     /// </summary>
     public enum AntialiasingQuality
@@ -269,6 +304,7 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] bool m_Dithering = false;
         [SerializeField] bool m_ClearDepth = true;
         [SerializeField] bool m_AllowXRRendering = true;
+        [SerializeField] PortalRenderType m_PortalState = PortalRenderType.None;
 
         [NonSerialized] Camera m_Camera;
 
