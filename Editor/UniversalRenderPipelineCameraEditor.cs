@@ -425,6 +425,7 @@ namespace UnityEditor.Rendering.Universal
             m_AdditionalCameraDataDithering = m_AdditionalCameraDataSO.FindProperty("m_Dithering");
             m_AdditionalCameraClearDepth = m_AdditionalCameraDataSO.FindProperty("m_ClearDepth");
             m_AdditionalCameraDataCameraTypeProp = m_AdditionalCameraDataSO.FindProperty("m_CameraType");
+            m_AdditionalCameraDataPortalState = m_AdditionalCameraDataSO.FindProperty("m_PortalState");
             m_AdditionalCameraDataCameras = m_AdditionalCameraDataSO.FindProperty("m_Cameras");
 #if ENABLE_VR && ENABLE_XR_MODULE
             m_AdditionalCameraDataAllowXRRendering = m_AdditionalCameraDataSO.FindProperty("m_AllowXRRendering");
@@ -471,6 +472,7 @@ namespace UnityEditor.Rendering.Universal
             CameraRenderType camType = (CameraRenderType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
             DrawCameraType();
+            DrawPortalType();
 
             EditorGUILayout.Space();
             // If we have different cameras selected that are of different types we do not allow multi editing and we do not draw any more UI.
@@ -668,6 +670,12 @@ namespace UnityEditor.Rendering.Universal
                 if (camType == CameraRenderType.Overlay && settings.targetTexture.objectReferenceValue != null)
                     settings.targetTexture.objectReferenceValue = null;
             }
+        }
+
+        void DrawPortalType()
+        {
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(m_AdditionalCameraDataPortalState, Styles.cameraType);
         }
 
         void DrawClearFlags()
