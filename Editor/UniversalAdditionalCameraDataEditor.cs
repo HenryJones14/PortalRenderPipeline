@@ -7,17 +7,11 @@ namespace UnityEditor.Rendering.Universal
     [CustomEditor(typeof(UniversalAdditionalCameraData))]
     class UniversalAdditionalCameraDataEditor : Editor
     {
-        private UniversalAdditionalCameraData script;
-
-        public void OnEnable()
-        {
-            script = (UniversalAdditionalCameraData)target;
-        }
-
         public override void OnInspectorGUI()
         {
-            script.portalType = (PortalRenderType)EditorGUILayout.EnumPopup(script.portalType);
+
         }
+
         [MenuItem("CONTEXT/UniversalAdditionalCameraData/Remove Component")]
         static void RemoveComponent(MenuCommand command)
         {
