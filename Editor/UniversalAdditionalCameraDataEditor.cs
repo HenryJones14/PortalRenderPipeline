@@ -16,7 +16,7 @@ namespace UnityEditor.Rendering.Universal
 
         public override void OnInspectorGUI()
         {
-            script.portalType = EditorGUILayout.EnumPopup(script.portalType);
+            script.portalType = (PortalRenderType)EditorGUILayout.EnumPopup(script.portalType);
         }
         [MenuItem("CONTEXT/UniversalAdditionalCameraData/Remove Component")]
         static void RemoveComponent(MenuCommand command)
