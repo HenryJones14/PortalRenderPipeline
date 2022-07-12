@@ -68,7 +68,7 @@ namespace UnityEngine.Rendering.Universal
     /// </summary>
     public enum PortalRenderType
     {
-        0 = None,
+        None = 0,
         Main_OpaquePass,
 
         BP_OpaquePass1,
