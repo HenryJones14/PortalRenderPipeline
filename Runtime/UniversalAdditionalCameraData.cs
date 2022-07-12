@@ -387,6 +387,16 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
+        /// Returns the portal renderType.
+        /// <see cref="PortalRenderType"/>.
+        /// </summary>
+        public PortalRenderType portalType
+        {
+            get => m_PortalState;
+            set => m_PortalState = value;
+        }
+
+        /// <summary>
         /// Returns the camera stack. Only valid for Base cameras.
         /// Overlay cameras have no stack and will return null.
         /// <seealso cref="CameraRenderType"/>.
