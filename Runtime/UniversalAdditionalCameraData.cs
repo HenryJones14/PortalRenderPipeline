@@ -69,6 +69,7 @@ namespace UnityEngine.Rendering.Universal
     public enum PortalRenderType
     {
         None = 0,
+        /*
         Main_OpaquePass,
 
         BP_OpaquePass1,
@@ -96,6 +97,10 @@ namespace UnityEngine.Rendering.Universal
         OP_TransparentPass1,
 
         Main_TransparentPass,
+        */
+        ForceDrawDepthAndColor,
+        ForceDrawDepth,
+        ForceDrawColor,
     }
 
     /// <summary>
