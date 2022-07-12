@@ -11,11 +11,11 @@
 #define SHADERGRAPH_AMBIENT_GROUND unity_AmbientGround
 
 #if defined(REQUIRE_DEPTH_TEXTURE)
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/DeclareDepthTexture.hlsl"
 #endif
 
 #if defined(REQUIRE_OPAQUE_TEXTURE)
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/DeclareOpaqueTexture.hlsl"
 #endif
 
 float shadergraph_LWSampleSceneDepth(float2 uv)

@@ -1,9 +1,9 @@
 #ifndef UNIVERSAL_SPEEDTREE7COMMON_PASSES_INCLUDED
 #define UNIVERSAL_SPEEDTREE7COMMON_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/UnityGBuffer.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/ShaderVariablesFunctions.hlsl"
 
 struct SpeedTreeVertexInput
 {

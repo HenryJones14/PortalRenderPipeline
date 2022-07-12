@@ -1,4 +1,4 @@
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
 #if SRC_TEXTURE2D_X_ARRAY

@@ -3,9 +3,9 @@
 
 // Includes
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareNormalsTexture.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/ShaderVariablesFunctions.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/DeclareDepthTexture.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/DeclareNormalsTexture.hlsl"
 
 // Textures & Samplers
 TEXTURE2D_X(_BaseMap);

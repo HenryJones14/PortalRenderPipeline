@@ -1,8 +1,8 @@
 #ifndef UNIVERSAL_SPEEDTREE8_PASSES_INCLUDED
 #define UNIVERSAL_SPEEDTREE8_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/UnityGBuffer.hlsl"
 
 struct SpeedTreeVertexInput
 {
