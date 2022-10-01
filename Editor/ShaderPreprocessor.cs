@@ -406,12 +406,6 @@ namespace UnityEditor.Rendering.Universal
                 if (renderer is ForwardRenderer)
                 {
                     ForwardRenderer forwardRenderer = (ForwardRenderer)renderer;
-                    if (forwardRenderer.renderingMode == RenderingMode.Deferred)
-                    {
-                        hasDeferredRenderer |= true;
-                        withAccurateGbufferNormals |= forwardRenderer.accurateGbufferNormals;
-                        withoutAccurateGbufferNormals |= !forwardRenderer.accurateGbufferNormals;
-                    }
                 }
 
                 // Check for Screen Space Ambient Occlusion Renderer Feature

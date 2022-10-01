@@ -4,17 +4,6 @@ using System.Reflection;
 namespace UnityEngine.Rendering.Universal
 {
     /// <summary>
-    /// Rendering modes for Universal renderer.
-    /// </summary>
-    public enum RenderingMode
-    {
-        /// <summary>Render all objects and lighting in one pass, with a hard limit on the number of lights that can be applied on an object.</summary>
-        Forward,
-        /// <summary>Render all objects first in a g-buffer pass, then apply all lighting in a separate pass using deferred shading.</summary>
-        Deferred
-    };
-
-    /// <summary>
     /// Default renderer for Universal RP.
     /// This renderer is supported on all Universal RP supported platforms.
     /// It uses a classic forward rendering strategy with per-object light culling.
@@ -29,10 +18,6 @@ namespace UnityEngine.Rendering.Universal
             public static readonly ProfilingSampler createCameraRenderTarget = new ProfilingSampler($"{k_Name}.{nameof(CreateCameraRenderTarget)}");
         }
 
-        // Rendering mode setup from UI.
-        internal RenderingMode renderingMode { get { return RenderingMode.Forward;  } }
-        // Actual rendering mode, which may be different (ex: wireframe rendering, harware not capable of deferred rendering).
-        internal RenderingMode actualRenderingMode { get { return GL.wireframe || m_DeferredLights == null || !m_DeferredLights.IsRuntimeSupportedThisFrame()  ? RenderingMode.Forward : this.renderingMode; } }
         internal bool accurateGbufferNormals { get { return m_DeferredLights != null ? m_DeferredLights.AccurateGbufferNormals : false; } }
         ColorGradingLutPass m_ColorGradingLutPass;
         DepthOnlyPass m_DepthPrepass;
@@ -80,9 +65,6 @@ namespace UnityEngine.Rendering.Universal
 
         ForwardLights m_ForwardLights;
         DeferredLights m_DeferredLights;
-#pragma warning disable 414
-        RenderingMode m_RenderingMode;
-#pragma warning restore 414
         StencilState m_DefaultStencilState;
 
         Material m_BlitMaterial;
@@ -117,7 +99,6 @@ namespace UnityEngine.Rendering.Universal
 
             m_ForwardLights = new ForwardLights();
             //m_DeferredLights.LightCulling = data.lightCulling;
-            this.m_RenderingMode = RenderingMode.Forward;
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
@@ -131,37 +112,6 @@ namespace UnityEngine.Rendering.Universal
             m_DepthPrepass = new DepthOnlyPass(RenderPassEvent.BeforeRenderingPrepasses, RenderQueueRange.opaque, data.opaqueLayerMask);
             m_DepthNormalPrepass = new DepthNormalOnlyPass(RenderPassEvent.BeforeRenderingPrepasses, RenderQueueRange.opaque, data.opaqueLayerMask);
             m_ColorGradingLutPass = new ColorGradingLutPass(RenderPassEvent.BeforeRenderingPrepasses, data.postProcessData);
-
-            if (this.renderingMode == RenderingMode.Deferred)
-            {
-                m_DeferredLights = new DeferredLights(m_TileDepthInfoMaterial, m_TileDeferredMaterial, m_StencilDeferredMaterial);
-                m_DeferredLights.AccurateGbufferNormals = data.accurateGbufferNormals;
-                //m_DeferredLights.TiledDeferredShading = data.tiledDeferredShading;
-                m_DeferredLights.TiledDeferredShading = false;
-                UniversalRenderPipelineAsset urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-
-                m_GBufferPass = new GBufferPass(RenderPassEvent.BeforeRenderingOpaques, RenderQueueRange.opaque, data.opaqueLayerMask, m_DefaultStencilState, stencilData.stencilReference, m_DeferredLights);
-                // Forward-only pass only runs if deferred renderer is enabled.
-                // It allows specific materials to be rendered in a forward-like pass.
-                // We render both gbuffer pass and forward-only pass before the deferred lighting pass so we can minimize copies of depth buffer and
-                // benefits from some depth rejection.
-                // - If a material can be rendered either forward or deferred, then it should declare a UniversalForward and a UniversalGBuffer pass.
-                // - If a material cannot be lit in deferred (unlit, bakedLit, special material such as hair, skin shader), then it should declare UniversalForwardOnly pass
-                // - Legacy materials have unamed pass, which is implicitely renamed as SRPDefaultUnlit. In that case, they are considered forward-only too.
-                // TO declare a material with unnamed pass and UniversalForward/UniversalForwardOnly pass is an ERROR, as the material will be rendered twice.
-                StencilState forwardOnlyStencilState = DeferredLights.OverwriteStencil(m_DefaultStencilState, (int)StencilUsage.MaterialMask);
-                ShaderTagId[] forwardOnlyShaderTagIds = new ShaderTagId[] {
-                    new ShaderTagId("UniversalForwardOnly"),
-                    new ShaderTagId("SRPDefaultUnlit"), // Legacy shaders (do not have a gbuffer pass) are considered forward-only for backward compatibility
-                    new ShaderTagId("LightweightForward") // Legacy shaders (do not have a gbuffer pass) are considered forward-only for backward compatibility
-                };
-                int forwardOnlyStencilRef = stencilData.stencilReference | (int)StencilUsage.MaterialUnlit;
-                m_RenderOpaqueForwardOnlyPass = new DrawObjectsPass("Render Opaques Forward Only", forwardOnlyShaderTagIds, true, RenderPassEvent.BeforeRenderingOpaques + 1, RenderQueueRange.opaque, data.opaqueLayerMask, forwardOnlyStencilState, forwardOnlyStencilRef);
-                m_GBufferCopyDepthPass = new CopyDepthPass(RenderPassEvent.BeforeRenderingOpaques + 2, m_CopyDepthMaterial);
-                m_TileDepthRangePass = new TileDepthRangePass(RenderPassEvent.BeforeRenderingOpaques + 3, m_DeferredLights, 0);
-                m_TileDepthRangeExtraPass = new TileDepthRangePass(RenderPassEvent.BeforeRenderingOpaques + 4, m_DeferredLights, 1);
-                m_DeferredPass = new DeferredPass(RenderPassEvent.BeforeRenderingOpaques + 5, m_DeferredLights);
-            }
 
             // Always create this pass even in deferred because we use it for wireframe rendering in the Editor or offscreen depth texture rendering.
             m_RenderOpaqueForwardPass = new DrawObjectsPass(URPProfileId.DrawOpaqueObjects, true, RenderPassEvent.BeforeRenderingOpaques, RenderQueueRange.opaque, data.opaqueLayerMask, m_DefaultStencilState, stencilData.stencilReference);
@@ -192,16 +142,6 @@ namespace UnityEngine.Rendering.Universal
             m_CameraDepthAttachment.Init("_CameraDepthAttachment");
             m_DepthTexture.Init("_CameraDepthTexture");
             m_NormalsTexture.Init("_CameraNormalsTexture");
-            if (this.renderingMode == RenderingMode.Deferred)
-            {
-                m_GBufferHandles = new RenderTargetHandle[(int)DeferredLights.GBufferHandles.Count];
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.DepthAsColor].Init("_GBufferDepthAsColor");
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.Albedo].Init("_GBuffer0");
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.SpecularMetallic].Init("_GBuffer1");
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.NormalSmoothness].Init("_GBuffer2");
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.Lighting] = new RenderTargetHandle();
-                m_GBufferHandles[(int)DeferredLights.GBufferHandles.ShadowMask].Init("_GBuffer4");
-            }
             m_OpaqueColor.Init("_CameraOpaqueTexture");
             m_AfterPostProcessColor.Init("_AfterPostProcessTexture");
             m_ColorGradingLut.Init("_InternalGradingLut");
@@ -212,15 +152,6 @@ namespace UnityEngine.Rendering.Universal
             {
                 cameraStacking = true,
             };
-
-            if (this.renderingMode == RenderingMode.Deferred)
-            {
-                unsupportedGraphicsDeviceTypes = new GraphicsDeviceType[] {
-                    GraphicsDeviceType.OpenGLCore,
-                    GraphicsDeviceType.OpenGLES2,
-                    GraphicsDeviceType.OpenGLES3
-                };
-            }
         }
 
         /// <inheritdoc />
@@ -303,7 +234,7 @@ namespace UnityEngine.Rendering.Universal
             // TODO: We could cache and generate the LUT before rendering the stack
             bool generateColorGradingLUT = cameraData.postProcessEnabled;
             bool isSceneViewCamera = cameraData.isSceneViewCamera;
-            bool requiresDepthTexture = cameraData.requiresDepthTexture || renderPassInputs.requiresDepthTexture || this.actualRenderingMode == RenderingMode.Deferred;
+            bool requiresDepthTexture = cameraData.requiresDepthTexture || renderPassInputs.requiresDepthTexture;
 
             bool mainLightShadows = m_MainLightShadowCasterPass.Setup(ref renderingData);
             bool additionalLightShadows = m_AdditionalLightsShadowCasterPass.Setup(ref renderingData);
@@ -337,8 +268,6 @@ namespace UnityEngine.Rendering.Universal
             // because BuiltinRenderTextureType.CameraTarget for depth means there is no explicit depth attachment...
             bool createDepthTexture = cameraData.requiresDepthTexture && !requiresDepthPrepass;
             createDepthTexture |= (cameraData.renderType == CameraRenderType.Base && !cameraData.resolveFinalTarget);
-            // Deferred renderer always need to access depth buffer.
-            createDepthTexture |= this.actualRenderingMode == RenderingMode.Deferred;
 #if ENABLE_VR && ENABLE_XR_MODULE
             if (cameraData.xr.enabled)
             {
@@ -381,8 +310,7 @@ namespace UnityEngine.Rendering.Universal
             // If deferred rendering path was selected, it has already made a copy.
             bool requiresDepthCopyPass = !requiresDepthPrepass
                                          && renderingData.cameraData.requiresDepthTexture
-                                         && createDepthTexture
-                                         && this.actualRenderingMode != RenderingMode.Deferred;
+                                         && createDepthTexture;
             bool copyColorPass = renderingData.cameraData.requiresOpaqueTexture || renderPassInputs.requiresColorTexture;
 
             // Assign camera targets (color and depth)
@@ -434,25 +362,20 @@ namespace UnityEngine.Rendering.Universal
                 EnqueuePass(m_XROcclusionMeshPass);
 #endif
 
-            if (this.actualRenderingMode == RenderingMode.Deferred)
-                EnqueueDeferred(ref renderingData, requiresDepthPrepass, mainLightShadows, additionalLightShadows);
-            else
-            {
-                // Optimized store actions are very important on tile based GPUs and have a great impact on performance.
-                // if MSAA is enabled and any of the following passes need a copy of the color or depth target, make sure the MSAA'd surface is stored
-                // if following passes won't use it then just resolve (the Resolve action will still store the resolved surface, but discard the MSAA'd surface, which is very expensive to store).
-                RenderBufferStoreAction opaquePassColorStoreAction = RenderBufferStoreAction.Store;
-                if (cameraTargetDescriptor.msaaSamples > 1)
-                    opaquePassColorStoreAction = copyColorPass ? RenderBufferStoreAction.StoreAndResolve : RenderBufferStoreAction.Store;
+            // Optimized store actions are very important on tile based GPUs and have a great impact on performance.
+            // if MSAA is enabled and any of the following passes need a copy of the color or depth target, make sure the MSAA'd surface is stored
+            // if following passes won't use it then just resolve (the Resolve action will still store the resolved surface, but discard the MSAA'd surface, which is very expensive to store).
+            RenderBufferStoreAction opaquePassColorStoreAction = RenderBufferStoreAction.Store;
+            if (cameraTargetDescriptor.msaaSamples > 1)
+                opaquePassColorStoreAction = copyColorPass ? RenderBufferStoreAction.StoreAndResolve : RenderBufferStoreAction.Store;
 
-                // make sure we store the depth only if following passes need it.
-                RenderBufferStoreAction opaquePassDepthStoreAction = (copyColorPass || requiresDepthCopyPass) ? RenderBufferStoreAction.Store : RenderBufferStoreAction.DontCare;
+            // make sure we store the depth only if following passes need it.
+            RenderBufferStoreAction opaquePassDepthStoreAction = (copyColorPass || requiresDepthCopyPass) ? RenderBufferStoreAction.Store : RenderBufferStoreAction.DontCare;
 
-                m_RenderOpaqueForwardPass.ConfigureColorStoreAction(opaquePassColorStoreAction);
-                m_RenderOpaqueForwardPass.ConfigureDepthStoreAction(opaquePassDepthStoreAction);
+            m_RenderOpaqueForwardPass.ConfigureColorStoreAction(opaquePassColorStoreAction);
+            m_RenderOpaqueForwardPass.ConfigureDepthStoreAction(opaquePassDepthStoreAction);
 
-                EnqueuePass(m_RenderOpaqueForwardPass);
-            }
+            EnqueuePass(m_RenderOpaqueForwardPass);
 
             Skybox cameraSkybox;
             cameraData.camera.TryGetComponent<Skybox>(out cameraSkybox);
@@ -597,10 +520,6 @@ namespace UnityEngine.Rendering.Universal
         public override void SetupLights(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             m_ForwardLights.Setup(context, ref renderingData);
-
-            // Perform per-tile light culling on CPU
-            if (this.actualRenderingMode == RenderingMode.Deferred)
-                m_DeferredLights.SetupLights(context, ref renderingData);
         }
 
         /// <inheritdoc />
@@ -623,13 +542,9 @@ namespace UnityEngine.Rendering.Universal
                 cullingParameters.cullingOptions &= ~CullingOptions.ShadowCasters;
             }
 
-            if (this.actualRenderingMode == RenderingMode.Deferred)
-                cullingParameters.maximumVisibleLights = 0xFFFF;
-            else
-            {
-                // We set the number of maximum visible lights allowed and we add one for the mainlight...
-                cullingParameters.maximumVisibleLights = UniversalRenderPipeline.maxVisibleAdditionalLights + 1;
-            }
+            // We set the number of maximum visible lights allowed and we add one for the mainlight...
+            cullingParameters.maximumVisibleLights = UniversalRenderPipeline.maxVisibleAdditionalLights + 1;
+
             cullingParameters.shadowDistance = cameraData.maxShadowDistance;
         }
 
@@ -779,15 +694,6 @@ namespace UnityEngine.Rendering.Universal
             // When rendering a camera stack we always create an intermediate render texture to composite camera results.
             // We create it upon rendering the Base camera.
             if (cameraData.renderType == CameraRenderType.Base && !cameraData.resolveFinalTarget)
-                return true;
-
-            // Always force rendering into intermediate color texture if deferred rendering mode is selected.
-            // Reason: without intermediate color texture, the target camera texture is y-flipped.
-            // However, the target camera texture is bound during gbuffer pass and deferred pass.
-            // Gbuffer pass will not be y-flipped because it is MRT (see ScriptableRenderContext implementation),
-            // while deferred pass will be y-flipped, which breaks rendering.
-            // This incurs an extra blit into at the end of rendering.
-            if (this.actualRenderingMode == RenderingMode.Deferred)
                 return true;
 
             bool isSceneViewCamera = cameraData.isSceneViewCamera;
