@@ -13,6 +13,7 @@ namespace UnityEditor.Rendering.Universal
         {
             // Groups
             public static GUIContent generalSettingsText = EditorGUIUtility.TrTextContent("General");
+            public static GUIContent portalSettingsText = EditorGUIUtility.TrTextContent("Portals");
             public static GUIContent qualitySettingsText = EditorGUIUtility.TrTextContent("Quality");
             public static GUIContent lightingSettingsText = EditorGUIUtility.TrTextContent("Lighting");
             public static GUIContent shadowSettingsText = EditorGUIUtility.TrTextContent("Shadows");
@@ -31,6 +32,9 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent requireOpaqueTextureText = EditorGUIUtility.TrTextContent("Opaque Texture", "If enabled the pipeline will copy the screen to texture after opaque objects are drawn. For transparent objects this can be bound in shaders as _CameraOpaqueTexture.");
             public static GUIContent opaqueDownsamplingText = EditorGUIUtility.TrTextContent("Opaque Downsampling", "The downsampling method that is used for the opaque texture");
             public static GUIContent supportsTerrainHolesText = EditorGUIUtility.TrTextContent("Terrain Holes", "When disabled, Universal Rendering Pipeline removes all Terrain hole Shader variants when you build for the Unity Player. This decreases build time.");
+
+            // Portal
+            public static GUIContent portalDepthText = EditorGUIUtility.TrTextContent("Portal Depth", "Controls how many times portals render the world.");
 
             // Quality
             public static GUIContent hdrText = EditorGUIUtility.TrTextContent("HDR", "Controls the global HDR settings.");
@@ -93,6 +97,7 @@ namespace UnityEditor.Rendering.Universal
         }
 
         SavedBool m_GeneralSettingsFoldout;
+        SavedBool m_PortalSettingsFoldout;
         SavedBool m_QualitySettingsFoldout;
         SavedBool m_LightingSettingsFoldout;
         SavedBool m_ShadowSettingsFoldout;
@@ -109,6 +114,8 @@ namespace UnityEditor.Rendering.Universal
         SerializedProperty m_OpaqueDownsamplingProp;
         SerializedProperty m_SupportsTerrainHolesProp;
         SerializedProperty m_StoreActionsOptimizationProperty;
+
+        SerializedProperty m_PortalDepth;
 
         SerializedProperty m_HDR;
         SerializedProperty m_MSAA;
@@ -153,6 +160,7 @@ namespace UnityEditor.Rendering.Universal
             serializedObject.Update();
 
             DrawGeneralSettings();
+            DrawPortalSettings();
             DrawQualitySettings();
             DrawLightingSettings();
             DrawShadowSettings();
@@ -168,6 +176,7 @@ namespace UnityEditor.Rendering.Universal
         void OnEnable()
         {
             m_GeneralSettingsFoldout = new SavedBool($"{target.GetType()}.GeneralSettingsFoldout", false);
+            m_PortalSettingsFoldout = new SavedBool($"{target.GetType()}.PortalSettingsFoldout", false);
             m_QualitySettingsFoldout = new SavedBool($"{target.GetType()}.QualitySettingsFoldout", false);
             m_LightingSettingsFoldout = new SavedBool($"{target.GetType()}.LightingSettingsFoldout", false);
             m_ShadowSettingsFoldout = new SavedBool($"{target.GetType()}.ShadowSettingsFoldout", false);
@@ -185,6 +194,8 @@ namespace UnityEditor.Rendering.Universal
             m_RequireOpaqueTextureProp = serializedObject.FindProperty("m_RequireOpaqueTexture");
             m_OpaqueDownsamplingProp = serializedObject.FindProperty("m_OpaqueDownsampling");
             m_SupportsTerrainHolesProp = serializedObject.FindProperty("m_SupportsTerrainHoles");
+
+            m_PortalDepth = serializedObject.FindProperty("m_PortalDepth");
 
             m_HDR = serializedObject.FindProperty("m_SupportsHDR");
             m_MSAA = serializedObject.FindProperty("m_MSAA");
@@ -265,6 +276,19 @@ namespace UnityEditor.Rendering.Universal
                 EditorGUILayout.Space();
             }
 
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+
+        void DrawPortalSettings()
+        {
+            m_PortalSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_PortalSettingsFoldout.value, Styles.portalSettingsText);
+            if (m_PortalSettingsFoldout.value)
+            {
+                EditorGUILayout.PropertyField(m_PortalDepth, Styles.portalDepthText);
+                EditorGUI.indentLevel--;
+                EditorGUILayout.Space();
+                EditorGUILayout.Space();
+            }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
 
