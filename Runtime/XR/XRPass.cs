@@ -86,10 +86,34 @@ namespace UnityEngine.Rendering.Universal
         internal bool hasMarkedLateLatch { get; set; }
 
         // Access to view information
-        internal Matrix4x4 GetProjMatrix(int viewIndex = 0)  { return views[viewIndex].projMatrix; }
+        internal Matrix4x4 GetProjMatrix(int viewIndex = 0)  { return ModifyProjectionMatrix(viewIndex); }
         internal Matrix4x4 GetViewMatrix(int viewIndex = 0)  { return views[viewIndex].viewMatrix; }
         internal int GetTextureArraySlice(int viewIndex = 0) { return views[viewIndex].textureArraySlice; }
         internal Rect GetViewport(int viewIndex = 0)         { return views[viewIndex].viewport; }
+
+        [Obsolete("Needs RAM optimization (a lot of garbage) !")]
+        internal Matrix4x4 ModifyProjectionMatrix(int ViewIndex)
+        {
+            //return views[ViewIndex].projMatrix;
+            Matrix4x4 matrix = views[ViewIndex].projMatrix;
+            Vector4 ClipPlane = new Vector4(0, 0, 1, Vector3.Dot(Vector3.forward, -Vector3.forward));
+            ClipPlane = Matrix4x4.Transpose(Matrix4x4.Inverse(views[ViewIndex].viewMatrix)) * ClipPlane;
+
+            Vector4 q = views[ViewIndex].projMatrix.inverse * new Vector4(
+                Mathf.Sign(ClipPlane.x),
+                Mathf.Sign(ClipPlane.y),
+                1.0f,
+                1.0f
+            );
+            Vector4 c = ClipPlane * (2.0F / (Vector4.Dot(ClipPlane, q)));
+            // third row = clip plane - fourth row
+            matrix[2]  = c.x - views[ViewIndex].projMatrix[3];
+            matrix[6]  = c.y - views[ViewIndex].projMatrix[7];
+            matrix[10] = c.z - views[ViewIndex].projMatrix[11];
+            matrix[14] = c.w - views[ViewIndex].projMatrix[15];
+
+            return matrix;
+        }
 
         // Combined projection and view matrices for culling
         internal ScriptableCullingParameters cullingParams { get; private set; }

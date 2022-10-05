@@ -147,6 +147,10 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] bool m_SupportsTerrainHoles = true;
         [SerializeField] StoreActionsOptimization m_StoreActionsOptimization = StoreActionsOptimization.Auto;
 
+        // Portal settings
+        [SerializeField, Range(0, 16)] byte m_PortalDepth = 3;
+        internal ClipPlane m_GlobalClipPlane = null;
+
         // Quality settings
         [SerializeField] bool m_SupportsHDR = true;
         [SerializeField] MsaaQuality m_MSAA = MsaaQuality.Disabled;
