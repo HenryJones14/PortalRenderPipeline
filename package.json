@@ -1,14 +1,13 @@
 {
-  "name": "com.gameboxinteractive.portal-render-pipeline",
-  "description": "Modified version of URP (10.8.1)",
-  "version": "10.8.1",
+  "name": "com.gameboxinteractive.portalrp",
+  "description": "Custom Render Pipeline to add portals to Unity 2020.3",
+  "version": "1.0.0",
   "unity": "2020.3",
   "unityRelease": "33f1",
   "displayName": "Portal RP",
   "dependencies": {
-    "com.unity.mathematics": "1.1.0",
-    "com.unity.render-pipelines.core": "10.8.1",
-    "com.unity.shadergraph": "10.8.1"
+    "com.unity.mathematics": "1.2.6",
+    "com.unity.render-pipelines.core": "10.8.1"
   },
   "keywords": [
     "graphics",
