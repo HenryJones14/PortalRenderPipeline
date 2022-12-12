@@ -1,8 +1,8 @@
 #ifndef UNIVERSAL_WAVING_GRASS_INPUT_INCLUDED
 #define UNIVERSAL_WAVING_GRASS_INPUT_INCLUDED
 
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/SurfaceInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
     float4 _MainTex_ST;
@@ -23,7 +23,10 @@ CBUFFER_START(TerrainGrass)
     float3 _CameraRight, _CameraUp;
 CBUFFER_END
 
-TEXTURE2D(_MainTex);            SAMPLER(sampler_MainTex);
+TEXTURE2D(_MainTex);
+SAMPLER(sampler_MainTex);
+float4 _MainTex_TexelSize;
+float4 _MainTex_MipInfo;
 
 // ---- Grass helpers
 

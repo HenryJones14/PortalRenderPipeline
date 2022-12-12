@@ -1,8 +1,8 @@
 #ifndef UNIVERSAL_PARTICLES_EDITOR_PASS_INCLUDED
 #define UNIVERSAL_PARTICLES_EDITOR_PASS_INCLUDED
 
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/Shaders/Particles/ParticlesInput.hlsl"
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Particles.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Particles.hlsl"
 
 float _ObjectId;
 float _PassValue;
@@ -22,7 +22,7 @@ VaryingsParticle vertParticleEditor(AttributesParticle input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.vertex.xyz);
+    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
 
     output.clipPos = vertexInput.positionCS;
     output.color = GetParticleColor(input.color);

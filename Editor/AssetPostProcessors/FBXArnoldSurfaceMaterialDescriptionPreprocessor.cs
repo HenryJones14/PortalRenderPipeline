@@ -15,8 +15,8 @@ namespace UnityEditor.Rendering.Universal
         static readonly uint k_Version = 2;
         static readonly int k_Order = 4;
 
-        static readonly string k_ShaderPath = "Packages/com.gameboxinteractive.portal-render-pipeline/Runtime/Materials/ArnoldStandardSurface/ArnoldStandardSurface.shadergraph";
-        static readonly string k_ShaderTransparentPath = "Packages/com.gameboxinteractive.portal-render-pipeline/Runtime/Materials/ArnoldStandardSurface/ArnoldStandardSurfaceTransparent.shadergraph";
+        static readonly string k_ShaderPath = "Packages/com.unity.render-pipelines.universal/Runtime/Materials/ArnoldStandardSurface/ArnoldStandardSurface.shadergraph";
+        static readonly string k_ShaderTransparentPath = "Packages/com.unity.render-pipelines.universal/Runtime/Materials/ArnoldStandardSurface/ArnoldStandardSurfaceTransparent.shadergraph";
 
         public override uint GetVersion()
         {
@@ -101,7 +101,6 @@ namespace UnityEditor.Rendering.Universal
                 {
                     material.SetFloat("_OPACITY", opacity);
                 }
-
             }
             else
             {
@@ -112,7 +111,7 @@ namespace UnityEditor.Rendering.Universal
                 material.shader = shader;
             }
 
-            
+
             foreach (var clip in clips)
             {
                 clip.ClearCurves();
@@ -227,7 +226,6 @@ namespace UnityEditor.Rendering.Universal
             remapPropertyFloatOrTexture3DsMax(description, material, "specular_IOR", "_SPECULAR_IOR");
 
             remapPropertyTexture(description, material, "normal_camera", "_NORMAL_MAP");
-
         }
 
         static void SetMaterialTextureProperty(string propertyName, Material material,

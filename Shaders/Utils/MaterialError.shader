@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Universal Render Pipeline/MaterialError"
+Shader "Hidden/Universal Render Pipeline/MaterialError"
 {
     SubShader
     {
@@ -18,7 +18,7 @@
             #pragma multi_compile _ DOTS_INSTANCING_ON
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-            #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Input.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 
             struct appdata_t {
                 float4 vertex : POSITION;

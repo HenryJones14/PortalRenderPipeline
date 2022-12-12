@@ -9,9 +9,9 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
-        #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.gameboxinteractive.portal-render-pipeline/Shaders/PostProcessing/Common.hlsl"
-        #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/DeclareDepthTexture.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
         TEXTURE2D_X(_SourceTex);
         TEXTURE2D_X(_ColorTexture);

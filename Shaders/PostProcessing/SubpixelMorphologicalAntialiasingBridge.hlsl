@@ -2,8 +2,8 @@
 #define UNIVERSAL_POSTPROCESSING_SMAA_BRIDGE
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/Shaders/PostProcessing/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl"
 
 #define SMAA_HLSL_4_1
 
@@ -34,7 +34,7 @@ float4 _Metrics;
     #define GAMMA_FOR_EDGE_DETECTION (1/2.2)
 #endif
 
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/Shaders/PostProcessing/SubpixelMorphologicalAntialiasing.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/PostProcessing/SubpixelMorphologicalAntialiasing.hlsl"
 
 // ----------------------------------------------------------------------------------------
 // Edge Detection
@@ -57,7 +57,7 @@ VaryingsEdge VertEdge(Attributes input)
 #else
     output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
     output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
-#endif  
+#endif
     SMAAEdgeDetectionVS(output.uv, output.offsets);
     return output;
 }
@@ -90,7 +90,7 @@ VaryingsBlend VertBlend(Attributes input)
 #else
     output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
     output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
-#endif  
+#endif
     SMAABlendingWeightCalculationVS(output.uv, output.pixcoord, output.offsets);
     return output;
 }
@@ -122,7 +122,7 @@ VaryingsNeighbor VertNeighbor(Attributes input)
 #else
     output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
     output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
-#endif  
+#endif
     SMAANeighborhoodBlendingVS(output.uv, output.offset);
     return output;
 }

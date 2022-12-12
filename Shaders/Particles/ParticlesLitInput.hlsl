@@ -1,8 +1,8 @@
 #ifndef UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED
 #define UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED
 
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/Shaders/Particles/ParticlesInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesInput.hlsl"
 
 // NOTE: Do not ifdef the properties here as SRP batcher can not handle different layouts.
 CBUFFER_START(UnityPerMaterial)
@@ -21,7 +21,7 @@ half _DistortionBlend;
 half _Surface;
 CBUFFER_END
 
-#include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Particles.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Particles.hlsl"
 
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);
 
@@ -47,7 +47,7 @@ half4 SampleAlbedo(float2 uv, float3 blendUv, half4 color, float4 particleColor,
     colorAddSubDiff = _BaseColorAddSubDiff;
 #endif
     // No distortion Support
-    albedo = MixParticleColor(albedo, particleColor, colorAddSubDiff);
+    albedo = MixParticleColor(albedo, half4(particleColor), colorAddSubDiff);
 
     AlphaDiscard(albedo.a, _Cutoff);
 
@@ -71,7 +71,7 @@ half4 SampleAlbedo(TEXTURE2D_PARAM(albedoMap, sampler_albedoMap), ParticleParams
     colorAddSubDiff = _BaseColorAddSubDiff;
 #endif
     // No distortion Support
-    albedo = MixParticleColor(albedo, params.vertexColor, colorAddSubDiff);
+    albedo = MixParticleColor(albedo, half4(params.vertexColor), colorAddSubDiff);
 
     AlphaDiscard(albedo.a, _Cutoff);
 
@@ -120,8 +120,8 @@ inline void InitializeParticleLitSurfaceData(float2 uv, float3 blendUv, float4 p
     outSurfaceData.albedo = AlphaModulate(outSurfaceData.albedo, albedo.a);
     outSurfaceData.alpha = albedo.a;
 
-    outSurfaceData.clearCoatMask       = 0.0h;
-    outSurfaceData.clearCoatSmoothness = 1.0h;
+    outSurfaceData.clearCoatMask       = half(0.0);
+    outSurfaceData.clearCoatSmoothness = half(1.0);
 }
 
 inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceData outSurfaceData)
@@ -158,8 +158,8 @@ inline void InitializeParticleLitSurfaceData(ParticleParams params, out SurfaceD
     outSurfaceData.albedo = AlphaModulate(outSurfaceData.albedo, albedo.a);
     outSurfaceData.alpha = albedo.a;
 
-    outSurfaceData.clearCoatMask       = 0.0h;
-    outSurfaceData.clearCoatSmoothness = 1.0h;
+    outSurfaceData.clearCoatMask       = half(0.0);
+    outSurfaceData.clearCoatSmoothness = half(1.0);
 }
 
 #endif // UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED

@@ -1,28 +1,28 @@
 {
-  "name": "com.gameboxinteractive.portal-render-pipeline",
-  "description": "Modified version of URP (10.8.1)",
-  "version": "10.8.1",
-  "unity": "2020.3",
-  "unityRelease": "33f1",
-  "displayName": "Portal RP",
+  "name": "com.unity.render-pipelines.universal",
+  "description": "The Universal Render Pipeline (URP) is a prebuilt Scriptable Render Pipeline, made by Unity. URP provides artist-friendly workflows that let you quickly and easily create optimized graphics across a range of platforms, from mobile to high-end consoles and PCs.",
+  "version": "12.1.6",
+  "unity": "2021.2",
+  "displayName": "Universal RP",
   "dependencies": {
-    "com.unity.mathematics": "1.1.0",
-    "com.unity.render-pipelines.core": "10.8.1",
-    "com.unity.shadergraph": "10.8.1"
+    "com.unity.mathematics": "1.2.1",
+    "com.unity.burst": "1.5.0",
+    "com.unity.render-pipelines.core": "12.1.6",
+    "com.unity.shadergraph": "12.1.6"
   },
   "keywords": [
     "graphics",
     "performance",
     "rendering",
+    "mobile",
     "render",
     "pipeline"
   ],
-  "upmCi": {
-    "footprint": "0991be5325b5a8159c18a8b94c6c7cd99669be25"
-  },
-  "repository": {
-    "url": "https://github.com/HenryJones14/PortalRenderPipeline.git",
-    "type": "git",
-    "revision": "41a193989d1e4e18ec3dced0f45168f8d2552a9a"
-  }
+  "samples": [
+    {
+      "displayName": "URP Package Samples",
+      "description": "Collection of scenes showcasing different features of the Universal Render Pipeline.",
+      "path": "Samples~/URPPackageSamples"
+    }
+  ]
 }

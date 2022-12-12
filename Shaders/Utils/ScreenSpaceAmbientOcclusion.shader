@@ -4,7 +4,7 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ImageBasedLighting.hlsl"
-        #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
         struct Attributes
         {
@@ -64,10 +64,11 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             HLSLPROGRAM
                 #pragma vertex VertDefault
                 #pragma fragment SSAO
-                #pragma multi_compile_local _SOURCE_DEPTH _SOURCE_DEPTH_NORMALS _SOURCE_GBUFFER
+                #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+                #pragma multi_compile_local _SOURCE_DEPTH _SOURCE_DEPTH_NORMALS
                 #pragma multi_compile_local _RECONSTRUCT_NORMAL_LOW _RECONSTRUCT_NORMAL_MEDIUM _RECONSTRUCT_NORMAL_HIGH
                 #pragma multi_compile_local _ _ORTHOGRAPHIC
-                #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/SSAO.hlsl"
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SSAO.hlsl"
             ENDHLSL
         }
 
@@ -81,8 +82,9 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
                 #pragma fragment HorizontalBlur
                 #define BLUR_SAMPLE_CENTER_NORMAL
                 #pragma multi_compile_local _ _ORTHOGRAPHIC
-                #pragma multi_compile_local _SOURCE_DEPTH _SOURCE_DEPTH_NORMALS _SOURCE_GBUFFER
-                #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/SSAO.hlsl"
+                #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+                #pragma multi_compile_local _SOURCE_DEPTH _SOURCE_DEPTH_NORMALS
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SSAO.hlsl"
             ENDHLSL
         }
 
@@ -94,7 +96,7 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             HLSLPROGRAM
                 #pragma vertex VertDefault
                 #pragma fragment VerticalBlur
-                #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/SSAO.hlsl"
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SSAO.hlsl"
             ENDHLSL
         }
 
@@ -106,7 +108,37 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             HLSLPROGRAM
                 #pragma vertex VertDefault
                 #pragma fragment FinalBlur
-                #include "Packages/com.gameboxinteractive.portal-render-pipeline/ShaderLibrary/SSAO.hlsl"
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SSAO.hlsl"
+            ENDHLSL
+        }
+
+        // 4 - After Opaque
+        Pass
+        {
+            Name "SSAO_AfterOpaque"
+
+            ZTest NotEqual
+            ZWrite Off
+            Cull Off
+            Blend One SrcAlpha, Zero One
+            BlendOp Add, Add
+
+            HLSLPROGRAM
+                #pragma vertex VertDefault
+                #pragma fragment FragAfterOpaque
+                #define _SCREEN_SPACE_OCCLUSION
+
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+                half4 FragAfterOpaque(Varyings input) : SV_Target
+                {
+                    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+                    AmbientOcclusionFactor aoFactor = GetScreenSpaceAmbientOcclusion(input.uv);
+                    half occlusion = aoFactor.indirectAmbientOcclusion;
+                    return half4(0.0, 0.0, 0.0, occlusion);
+                }
+
             ENDHLSL
         }
     }
