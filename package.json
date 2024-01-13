@@ -1,27 +1,27 @@
 {
-  "name": "com.gameboxinteractive.portalrp",
-  "description": "Custom Render Pipeline to add portals to Unity 2020.3",
-  "version": "1.0.0",
-  "unity": "2020.3",
-  "unityRelease": "33f1",
-  "displayName": "Portal RP",
-  "dependencies": {
-    "com.unity.mathematics": "1.2.6",
-    "com.unity.render-pipelines.core": "10.8.1"
-  },
-  "keywords": [
-    "graphics",
-    "performance",
-    "rendering",
-    "render",
-    "pipeline"
-  ],
-  "upmCi": {
-    "footprint": "0991be5325b5a8159c18a8b94c6c7cd99669be25"
-  },
-  "repository": {
-    "url": "https://github.com/HenryJones14/PortalRenderPipeline.git",
-    "type": "git",
-    "revision": "41a193989d1e4e18ec3dced0f45168f8d2552a9a"
-  }
+	"name": "com.gameboxinteractive.portalrp",
+	"version": "1.0.0",
+
+
+
+	"description": "Scriptable render pipeline for PortalVR",
+	"displayName": "Portal RP",
+	"unity": "2022.3",
+
+
+
+	"author": {
+		"name": "Gamebox Interactive",
+		"email": "support@gameboxinteractive.net",
+		"url": "https://www.gameboxinteractive.net/"
+	},
+	"changelogUrl": "https://www.google.com/",
+	"dependencies": {
+		"com.unity.render-pipelines.core": "14.0.0"
+	},
+	"documentationUrl": "https://www.google.com/",
+	"hideInEditor": false,
+	"keywords": [
+		"SRP"
+	]
 }
