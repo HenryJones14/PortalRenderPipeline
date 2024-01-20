@@ -62,7 +62,7 @@ Shader "PortalRP/StereoEyeIndexColor"
                 
                 unity_StereoEyeIndex = input.instanceID & 0x01;
                 unity_InstanceID = unity_BaseInstanceID + (input.instanceID >> 1);
-                //UNITY_INITIALIZE_OUTPUT(FragmentInput, output); <- useless? cast(initialization) to 0
+
                 output.stereoEyeID = unity_StereoEyeIndex;
 
                 output.pos = mul(MATRIX_P, mul(MATRIX_V, mul(MATRIX_M, input.pos)));
@@ -74,12 +74,10 @@ Shader "PortalRP/StereoEyeIndexColor"
 
             float4 FragmentProgram (FragmentInput input) : SV_Target
             {
-                unity_StereoEyeIndex = input.stereoEyeID;
-
                 float4 col = tex2D(_MainTex, input.uvs.xy);
                 
-                col.r = col.r * unity_StereoEyeIndex;
-                col.g = col.g * (1 - unity_StereoEyeIndex);
+                col.r = col.r * input.stereoEyeID;
+                col.g = col.g * (1 - input.stereoEyeID);
                 col.b = 0;
 
                 return col;

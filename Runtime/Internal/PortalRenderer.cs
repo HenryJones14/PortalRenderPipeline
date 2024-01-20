@@ -144,6 +144,7 @@ namespace PortalRP
                     // Render
                     {
 						ScriptableCullingParameters parameters = xrpass.cullingParams;
+                        parameters.SetCullingPlane(4, new Plane(Vector3.forward, Vector3.zero));
                         CullingResults results = Context.Cull(ref parameters);
 
                         SortingSettings sorting = new SortingSettings(RenderCamera);
@@ -173,13 +174,14 @@ namespace PortalRP
                 buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
                 buffer.ClearRenderTarget(RTClearFlags.All, clear, 1f, 0u);
                 buffer.SetGlobalMatrix("ViewMatrix", RenderCamera.worldToCameraMatrix);
-                buffer.SetGlobalMatrix("ProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, false));
+                buffer.SetGlobalMatrix("ProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, RenderCamera.cameraType == CameraType.SceneView));
                 Context.ExecuteCommandBuffer(buffer);
                 buffer.Clear();
 
                 // Render
                 {
                     RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
+                    parameters.SetCullingPlane(4, new Plane(Vector3.forward, Vector3.zero));
                     CullingResults results = Context.Cull(ref parameters);
 
                     SortingSettings sorting = new SortingSettings(RenderCamera);
