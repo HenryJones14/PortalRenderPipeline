@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
+using static UnityEditor.ShaderData;
 
 namespace PortalRP
 {
@@ -118,7 +119,7 @@ namespace PortalRP
 
 		public void RenderCamera(ref ScriptableRenderContext Context, Camera RenderCamera)
         {
-            Context.SetupCameraProperties(RenderCamera, RenderCamera.stereoEnabled);
+            //Context.SetupCameraProperties(RenderCamera, RenderCamera.stereoEnabled);
             bool mirror = false;
 
             if (RenderCamera.stereoEnabled)
@@ -128,22 +129,35 @@ namespace PortalRP
 
                 foreach ((Camera camera, XRPass xrpass) in layout.GetActivePasses())
                 {
-					buffer.SetViewProjectionMatrices(xrpass.GetViewMatrix(), xrpass.GetProjMatrix());
-					Debug.Log(xrpass.multipassId + ": " + xrpass.GetProjMatrix().ToString());
-
                     xrpass.StartSinglePass(buffer);
 
                     buffer.SetRenderTarget(xrpass.renderTarget, 0, CubemapFace.Unknown, -1);
                     buffer.ClearRenderTarget(RTClearFlags.All, clear, 1f, 0u);
 
+                    buffer.SetGlobalMatrixArray("SterioViewMatrix", new Matrix4x4[] { RenderCamera.worldToCameraMatrix, RenderCamera.worldToCameraMatrix  });
+                    buffer.SetGlobalMatrixArray("SterioProjMatrix", new Matrix4x4[] { GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(0), false), GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(1), false) });
+
+                    Context.ExecuteCommandBuffer(buffer);
+                    buffer.Clear();
+
 
                     // Render
                     {
-                        //Matrix4x4[] matricies = new Matrix4x4[2] { StaticVariables.bluePortalMatrix, StaticVariables.orangePortalMatrix };
-                        //buffer.DrawMeshInstanced(mesh, 0, material, 0, matricies);
+						ScriptableCullingParameters parameters = xrpass.cullingParams;
+                        CullingResults results = Context.Cull(ref parameters);
+
+                        SortingSettings sorting = new SortingSettings(RenderCamera);
+                        sorting.criteria = SortingCriteria.CommonOpaque;
+
+                        DrawingSettings drawing = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sorting);
+                        FilteringSettings filtering = new FilteringSettings(RenderQueueRange.opaque);
+
+                        Context.DrawRenderers(results, ref drawing, ref filtering);
 
                         buffer.DrawMesh(mesh, StaticVariables.bluePortalMatrix, material);
                         buffer.DrawMesh(mesh, StaticVariables.orangePortalMatrix, material);
+                        Context.ExecuteCommandBuffer(buffer);
+                        buffer.Clear();
                     }
 
                     xrpass.StopSinglePass(buffer);
@@ -158,18 +172,29 @@ namespace PortalRP
             {
                 buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
                 buffer.ClearRenderTarget(RTClearFlags.All, clear, 1f, 0u);
+                buffer.SetGlobalMatrix("ViewMatrix", RenderCamera.worldToCameraMatrix);
+                buffer.SetGlobalMatrix("ProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, false));
+                Context.ExecuteCommandBuffer(buffer);
+                buffer.Clear();
 
                 // Render
                 {
-                    //Matrix4x4[] matricies = new Matrix4x4[2] { StaticVariables.bluePortalMatrix, StaticVariables.orangePortalMatrix };
-                    //buffer.DrawMeshInstanced(mesh, 0, material, 0, matricies);
+                    RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
+                    CullingResults results = Context.Cull(ref parameters);
+
+                    SortingSettings sorting = new SortingSettings(RenderCamera);
+                    sorting.criteria = SortingCriteria.CommonOpaque;
+
+                    DrawingSettings drawing = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sorting);
+                    FilteringSettings filtering = new FilteringSettings(RenderQueueRange.opaque);
+
+                    Context.DrawRenderers(results, ref drawing, ref filtering);
 
                     buffer.DrawMesh(mesh, StaticVariables.bluePortalMatrix, material);
                     buffer.DrawMesh(mesh, StaticVariables.orangePortalMatrix, material);
+                    Context.ExecuteCommandBuffer(buffer);
+                    buffer.Clear();
                 }
-
-                Context.ExecuteCommandBuffer(buffer);
-                buffer.Clear();
             }
 
 			if (RenderCamera.stereoEnabled)
@@ -276,5 +301,13 @@ namespace PortalRP
 			Context.Submit();
 		}
 		*/
+
+        public bool IsCameraProjectionMatrixFlipped()
+        {
+            if (!SystemInfo.graphicsUVStartsAtTop)
+                return false;
+
+            return true;
+        }
     }
 }
