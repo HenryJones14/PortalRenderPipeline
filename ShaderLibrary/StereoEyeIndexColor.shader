@@ -7,7 +7,7 @@ Shader "PortalRP/StereoEyeIndexColor"
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" }
+        Tags { "LightMode"="PortalRP" "RenderType" = "Opaque" }
 
         Pass
         {
