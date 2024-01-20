@@ -4,41 +4,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
-using static UnityEditor.ShaderData;
 
 namespace PortalRP
 {
 	internal class PortalRenderer
 	{
 		// Public variables
-		Color clear = Color.clear;
+		PortalAsset asset;
 
-		Mesh mesh;
-		Material material;
-
-		// Private variables
-		CommandBuffer buffer;
-		XRPass xr;
-
-		// Cashed variables
+        // Private variables
+        CommandBuffer buffer;
 
 
-		public PortalRenderer(Color ClearColor, Mesh Mesh, Material Material)
+		public PortalRenderer(PortalAsset Asset)
         {
-            //XRSystem.dumpDebugInfo = true;
+            asset = Asset;
 
             buffer = new CommandBuffer();
 			buffer.name = "PortalRP";
 
 			XRSystem.Initialize(Initialize, Shader.Find("Hidden/Universal Render Pipeline/XR/XROcclusionMesh"), Shader.Find("Hidden/Universal Render Pipeline/XR/XRMirrorView"));
 
-			XRSystem.SetDisplayMSAASamples(MSAASamples.MSAA4x);
+			XRSystem.SetDisplayMSAASamples(MSAASamples.None);
 			XRSystem.SetRenderScale(1f);
-
-			clear = ClearColor;
-			mesh = Mesh;
-			material = Material;
-		}
+        }
 
 		~PortalRenderer()
 		{
@@ -51,75 +40,31 @@ namespace PortalRP
 		private XRPass Initialize(XRPassCreateInfo CreateInfo)
 		{
 			return XRPass.CreateDefault(CreateInfo);
-		}
+        }
 
-		public void RenderSingleCamera(ref ScriptableRenderContext Context, in Camera RenderCamera, in XRPass RenderPass)
+        private void RenderOpaqueScene(ref ScriptableRenderContext RenderContext, Camera RenderCamera, ref ScriptableCullingParameters CullingParameters, ref RenderStateBlock StateBlock)
         {
-            CullingResults results;
+            CullingResults results = RenderContext.Cull(ref CullingParameters);
 
-			if (RenderPass == null)
-			{
-				Context.SetupCameraProperties(RenderCamera, false, -1);
-				buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-				buffer.ClearRenderTarget(RTClearFlags.All, Color.red, 1f, 0u);
+            SortingSettings sorting = new SortingSettings(RenderCamera);
+            sorting.criteria = SortingCriteria.CommonOpaque;
 
-				RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
-				results = Context.Cull(ref parameters);
-			}
-			else
-            {
-                buffer.SetRenderTarget(RenderPass.renderTarget, 0, CubemapFace.Unknown, -1);
-				buffer.EnableShaderKeyword("UNITY_STEREO_INSTANCING_ENABLED");
+            DrawingSettings drawing = new DrawingSettings(new ShaderTagId("PortalRP"), sorting);
+            FilteringSettings filtering = new FilteringSettings(RenderQueueRange.opaque);
 
-                if (SystemInfo.supportsMultiview)
-                {
-                    buffer.EnableShaderKeyword("STEREO_MULTIVIEW_ON");
-                }
-                else
-                {
-                    buffer.EnableShaderKeyword("STEREO_INSTANCING_ON");
-                    buffer.SetInstanceMultiplier(2);
-                }
+            RenderContext.DrawRenderers(results, ref drawing, ref filtering, ref StateBlock);
 
-				
-                buffer.ClearRenderTarget(RTClearFlags.All, Color.green, 1f, 0u);
-                //RenderPass.RenderOcclusionMesh(buffer);
+            RenderContext.ExecuteCommandBuffer(buffer);
+            buffer.Clear();
+        }
 
-				ScriptableCullingParameters parameters = RenderPass.cullingParams;
-				results = Context.Cull(ref parameters);
-            }
-
-            //Matrix4x4[] matricies = new Matrix4x4[2] { StaticVariables.bluePortalMatrix, StaticVariables.orangePortalMatrix };
-            //buffer.DrawMeshInstanced(mesh, 0, material, 0, matricies);
-            buffer.DrawMesh(mesh, StaticVariables.bluePortalMatrix, material);
-            buffer.DrawMesh(mesh, StaticVariables.orangePortalMatrix, material);
-
-            Context.ExecuteCommandBuffer(buffer);
-			buffer.Clear();
-
-
-            SortingSettings sortingSettings = new SortingSettings();
-			DrawingSettings drawSettings = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sortingSettings);
-			FilteringSettings filterSettings = new FilteringSettings(RenderQueueRange.all);
-			drawSettings.enableInstancing = true;
-
-			Context.DrawRenderers(results, ref drawSettings, ref filterSettings);
-
-
-			if (RenderPass != null)
-			{
-				RenderPass.StopSinglePass(buffer);
-                Context.ExecuteCommandBuffer(buffer);
-                buffer.Clear();
-            }
-
-			Context.Submit();
-		}
-
-
-		public void RenderCamera(ref ScriptableRenderContext Context, Camera RenderCamera)
+        private void SceneTransparentScene()
         {
-            //Context.SetupCameraProperties(RenderCamera, RenderCamera.stereoEnabled);
+
+        }
+
+        public void RenderCamera(ref ScriptableRenderContext Context, Camera RenderCamera)
+        {
             bool mirror = false;
 
             if (RenderCamera.stereoEnabled)
@@ -132,35 +77,20 @@ namespace PortalRP
                     xrpass.StartSinglePass(buffer);
 
                     buffer.SetRenderTarget(xrpass.renderTarget, 0, CubemapFace.Unknown, -1);
-                    buffer.ClearRenderTarget(RTClearFlags.All, clear, 1f, 0u);
+                    buffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
 
-                    buffer.SetGlobalMatrixArray("SterioViewMatrix", new Matrix4x4[] { RenderCamera.worldToCameraMatrix, RenderCamera.worldToCameraMatrix  });
+                    // GL.GetGPUProjectionMatrix(xrPass.GetProjMatrix(viewIndex), renderIntoTexture); * xrPass.GetViewMatrix(viewIndex)
+                    buffer.SetGlobalMatrixArray("SterioViewMatrix", new Matrix4x4[] { xrpass.GetViewMatrix(0), xrpass.GetViewMatrix(1) });
                     buffer.SetGlobalMatrixArray("SterioProjMatrix", new Matrix4x4[] { GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(0), false), GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(1), false) });
 
                     Context.ExecuteCommandBuffer(buffer);
                     buffer.Clear();
 
-
-                    // Render
-                    {
-						ScriptableCullingParameters parameters = xrpass.cullingParams;
-                        parameters.SetCullingPlane(4, new Plane(Vector3.forward, Vector3.zero));
-                        CullingResults results = Context.Cull(ref parameters);
-
-                        SortingSettings sorting = new SortingSettings(RenderCamera);
-                        sorting.criteria = SortingCriteria.CommonOpaque;
-
-                        DrawingSettings drawing = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sorting);
-                        FilteringSettings filtering = new FilteringSettings(RenderQueueRange.opaque);
-
-                        Context.DrawRenderers(results, ref drawing, ref filtering);
-
-                        buffer.DrawMesh(mesh, StaticVariables.bluePortalMatrix, material);
-                        buffer.DrawMesh(mesh, StaticVariables.orangePortalMatrix, material);
-                        Context.ExecuteCommandBuffer(buffer);
-                        buffer.Clear();
-                    }
-
+					ScriptableCullingParameters parameters = xrpass.cullingParams;
+                    parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.forward, StaticVariables.bluePortalPosition));
+                    RenderStateBlock block = new RenderStateBlock(RenderStateMask.Nothing);
+                    RenderOpaqueScene(ref Context, RenderCamera, ref parameters, ref block);
+                    
                     xrpass.StopSinglePass(buffer);
 
                     Context.ExecuteCommandBuffer(buffer);
@@ -172,31 +102,16 @@ namespace PortalRP
 			else
             {
                 buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
-                buffer.ClearRenderTarget(RTClearFlags.All, clear, 1f, 0u);
-                buffer.SetGlobalMatrix("ViewMatrix", RenderCamera.worldToCameraMatrix);
-                buffer.SetGlobalMatrix("ProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, RenderCamera.cameraType == CameraType.SceneView));
+                buffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
+                buffer.SetGlobalMatrix("NormalViewMatrix", RenderCamera.worldToCameraMatrix);
+                buffer.SetGlobalMatrix("NormalProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, RenderCamera.cameraType == CameraType.SceneView));
                 Context.ExecuteCommandBuffer(buffer);
                 buffer.Clear();
 
-                // Render
-                {
-                    RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
-                    parameters.SetCullingPlane(4, new Plane(Vector3.forward, Vector3.zero));
-                    CullingResults results = Context.Cull(ref parameters);
-
-                    SortingSettings sorting = new SortingSettings(RenderCamera);
-                    sorting.criteria = SortingCriteria.CommonOpaque;
-
-                    DrawingSettings drawing = new DrawingSettings(new ShaderTagId("SRPDefaultUnlit"), sorting);
-                    FilteringSettings filtering = new FilteringSettings(RenderQueueRange.opaque);
-
-                    Context.DrawRenderers(results, ref drawing, ref filtering);
-
-                    buffer.DrawMesh(mesh, StaticVariables.bluePortalMatrix, material);
-                    buffer.DrawMesh(mesh, StaticVariables.orangePortalMatrix, material);
-                    Context.ExecuteCommandBuffer(buffer);
-                    buffer.Clear();
-                }
+                RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
+                parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.forward, StaticVariables.bluePortalPosition));
+                RenderStateBlock block = new RenderStateBlock(RenderStateMask.Nothing);
+                RenderOpaqueScene(ref Context, RenderCamera, ref parameters, ref block);
             }
 
 			if (RenderCamera.stereoEnabled)
