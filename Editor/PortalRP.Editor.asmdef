@@ -2,6 +2,7 @@
     "name": "PortalRP.Editor",
     "rootNamespace": "PortalRP",
     "references": [
+        "GUID:96a5776e0e13d2145b0e6408c74bdc77",
         "GUID:df380645f10b7bc4b97d4f5eb6303d95",
         "GUID:3eae0364be2026648bf74846acb8a731"
     ],

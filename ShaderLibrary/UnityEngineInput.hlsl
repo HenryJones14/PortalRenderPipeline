@@ -17,10 +17,10 @@ float4x4 unity_WorldToObject;
 
 #else
 
-	float4x4 ViewMatrix;
-	float4x4 ProjMatrix;
+	float4x4 NormalViewMatrix;
+	float4x4 NormalProjMatrix;
 
-	#define MATRIX_V ViewMatrix
-	#define MATRIX_P ProjMatrix
+	#define MATRIX_V NormalViewMatrix
+	#define MATRIX_P NormalProjMatrix
 
 #endif
