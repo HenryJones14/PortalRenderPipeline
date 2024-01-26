@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 namespace PortalRP
 {
 	[CreateAssetMenu(menuName = "Rendering/PortalRP/PortalRP Asset", fileName = "PRP_Asset")]
-	internal class PortalAsset : RenderPipelineAsset
+	public class PortalAsset : RenderPipelineAsset
 	{
 #if UNITY_EDITOR
 		public static PortalAsset EditorInstance;
