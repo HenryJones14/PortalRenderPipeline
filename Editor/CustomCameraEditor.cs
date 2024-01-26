@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using static UnityEditor.Rendering.CameraUI;
-using System.Linq;
-using UnityEditor.Rendering;
 
 namespace PortalRP
 {
@@ -54,7 +49,7 @@ namespace PortalRP
 
         private void DrawProjection()
         {
-            script.orthographic = (ProjectionType)EditorGUILayout.EnumPopup("Projection", script.orthographic ? ProjectionType.Orthographic : ProjectionType.Perspective) == ProjectionType.Orthographic;
+            script.orthographic = (UnityEditor.Rendering.CameraUI.ProjectionType)EditorGUILayout.EnumPopup("Projection", script.orthographic ? UnityEditor.Rendering.CameraUI.ProjectionType.Orthographic : UnityEditor.Rendering.CameraUI.ProjectionType.Perspective) == UnityEditor.Rendering.CameraUI.ProjectionType.Orthographic;
 
             if (script.orthographic)
             {

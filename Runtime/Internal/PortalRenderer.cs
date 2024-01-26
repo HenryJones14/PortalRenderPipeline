@@ -126,7 +126,16 @@ namespace PortalRP
                 XRSystem.EndLayout();
             }
 
-            Context.Submit();
+#if UNITY_EDITOR
+			if (Handles.ShouldRenderGizmos())
+			{
+                Context.SetupCameraProperties(RenderCamera);
+                Context.DrawGizmos(RenderCamera, GizmoSubset.PreImageEffects);
+                Context.DrawGizmos(RenderCamera, GizmoSubset.PostImageEffects);
+            }
+#endif
+
+			Context.Submit();
         }
 
         /*
