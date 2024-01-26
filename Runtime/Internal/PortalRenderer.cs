@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
+using UnityEditor;
 
 namespace PortalRP
 {
@@ -13,17 +14,22 @@ namespace PortalRP
 		PortalAsset asset;
 
         // Private variables
-        CommandBuffer buffer;
+        CommandBuffer drawingBuffer;
+        CommandBuffer commandBuffer;
 
 
-		public PortalRenderer(PortalAsset Asset)
+        public PortalRenderer(PortalAsset Asset)
         {
             asset = Asset;
 
-            buffer = new CommandBuffer();
-			buffer.name = "PortalRP";
+            commandBuffer = new CommandBuffer();
+			commandBuffer.name = "PortalRP";
 
-			XRSystem.Initialize(Initialize, Shader.Find("Hidden/Universal Render Pipeline/XR/XROcclusionMesh"), Shader.Find("Hidden/Universal Render Pipeline/XR/XRMirrorView"));
+            drawingBuffer = new CommandBuffer();
+            drawingBuffer.name = "Draw Objects";
+
+
+            XRSystem.Initialize(Initialize, Shader.Find("Hidden/Universal Render Pipeline/XR/XROcclusionMesh"), Shader.Find("Hidden/Universal Render Pipeline/XR/XRMirrorView"));
 
 			XRSystem.SetDisplayMSAASamples(MSAASamples.None);
 			XRSystem.SetRenderScale(1f);
@@ -33,9 +39,12 @@ namespace PortalRP
 		{
 			XRSystem.Dispose();
 
-			buffer.Dispose();
-			buffer = null;
-		}
+            commandBuffer.Dispose();
+            commandBuffer = null;
+
+            drawingBuffer.Dispose();
+            drawingBuffer = null;
+        }
 
 		private XRPass Initialize(XRPassCreateInfo CreateInfo)
 		{
@@ -54,8 +63,14 @@ namespace PortalRP
 
             RenderContext.DrawRenderers(results, ref drawing, ref filtering, ref StateBlock);
 
-            RenderContext.ExecuteCommandBuffer(buffer);
-            buffer.Clear();
+            drawingBuffer.BeginSample("DrawMesh (StaticVariables)");
+            drawingBuffer.DrawMeshInstanced(asset.teapot, 0, asset.material, 0, StaticVariables.instances);
+            drawingBuffer.DrawMesh(asset.mesh, StaticVariables.bluePortalMatrix, asset.material, 0, 0);
+            drawingBuffer.DrawMesh(asset.mesh, StaticVariables.orangePortalMatrix, asset.material, 0, 0);
+            drawingBuffer.EndSample("DrawMesh (StaticVariables)");
+
+            RenderContext.ExecuteCommandBuffer(drawingBuffer);
+            drawingBuffer.Clear();
         }
 
         private void SceneTransparentScene()
@@ -74,39 +89,39 @@ namespace PortalRP
 
                 foreach ((Camera camera, XRPass xrpass) in layout.GetActivePasses())
                 {
-                    xrpass.StartSinglePass(buffer);
+                    xrpass.StartSinglePass(commandBuffer);
 
-                    buffer.SetRenderTarget(xrpass.renderTarget, 0, CubemapFace.Unknown, -1);
-                    buffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
+                    commandBuffer.SetRenderTarget(xrpass.renderTarget, 0, CubemapFace.Unknown, -1);
+                    commandBuffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
 
                     // GL.GetGPUProjectionMatrix(xrPass.GetProjMatrix(viewIndex), renderIntoTexture); * xrPass.GetViewMatrix(viewIndex)
-                    buffer.SetGlobalMatrixArray("SterioViewMatrix", new Matrix4x4[] { xrpass.GetViewMatrix(0), xrpass.GetViewMatrix(1) });
-                    buffer.SetGlobalMatrixArray("SterioProjMatrix", new Matrix4x4[] { GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(0), false), GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(1), false) });
+                    commandBuffer.SetGlobalMatrixArray("SterioViewMatrix", new Matrix4x4[] { xrpass.GetViewMatrix(0), xrpass.GetViewMatrix(1) });
+                    commandBuffer.SetGlobalMatrixArray("SterioProjMatrix", new Matrix4x4[] { GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(0), false), GL.GetGPUProjectionMatrix(xrpass.GetProjMatrix(1), false) });
 
-                    Context.ExecuteCommandBuffer(buffer);
-                    buffer.Clear();
+                    Context.ExecuteCommandBuffer(commandBuffer);
+                    commandBuffer.Clear();
 
 					ScriptableCullingParameters parameters = xrpass.cullingParams;
                     parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.forward, StaticVariables.bluePortalPosition));
                     RenderStateBlock block = new RenderStateBlock(RenderStateMask.Nothing);
                     RenderOpaqueScene(ref Context, RenderCamera, ref parameters, ref block);
                     
-                    xrpass.StopSinglePass(buffer);
+                    xrpass.StopSinglePass(commandBuffer);
 
-                    Context.ExecuteCommandBuffer(buffer);
-                    buffer.Clear();
+                    Context.ExecuteCommandBuffer(commandBuffer);
+                    commandBuffer.Clear();
 
                     mirror = true;
                 }
             }
 			else
             {
-                buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
-                buffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
-                buffer.SetGlobalMatrix("NormalViewMatrix", RenderCamera.worldToCameraMatrix);
-                buffer.SetGlobalMatrix("NormalProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, RenderCamera.cameraType == CameraType.SceneView));
-                Context.ExecuteCommandBuffer(buffer);
-                buffer.Clear();
+                commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1);
+                commandBuffer.ClearRenderTarget(RTClearFlags.All, asset.clearColor, 1f, 0u);
+                commandBuffer.SetGlobalMatrix("NormalViewMatrix", RenderCamera.worldToCameraMatrix);
+                commandBuffer.SetGlobalMatrix("NormalProjMatrix", GL.GetGPUProjectionMatrix(RenderCamera.projectionMatrix, RenderCamera.cameraType == CameraType.SceneView));
+                Context.ExecuteCommandBuffer(commandBuffer);
+                commandBuffer.Clear();
 
                 RenderCamera.TryGetCullingParameters(out ScriptableCullingParameters parameters);
                 parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.forward, StaticVariables.bluePortalPosition));
@@ -118,9 +133,9 @@ namespace PortalRP
             {
                 if (mirror)
                 {
-                    XRSystem.RenderMirrorView(buffer, RenderCamera);
-                    Context.ExecuteCommandBuffer(buffer);
-                    buffer.Clear();
+                    XRSystem.RenderMirrorView(commandBuffer, RenderCamera);
+                    Context.ExecuteCommandBuffer(commandBuffer);
+                    commandBuffer.Clear();
                 }
 
                 XRSystem.EndLayout();
