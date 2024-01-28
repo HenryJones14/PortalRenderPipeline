@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PRP_Asset
   m_EditorClassIdentifier: 
   clearColor: {r: 0.14618193, g: 0.36042747, b: 0.6886792, a: 0}
-  mesh: {fileID: 4263762089172682282, guid: 0229a2f8bba01f14abf1b86762013775, type: 3}
-  teapot: {fileID: -4041163356895272288, guid: cbf2eef4a0175c94bbd8fc085c2e7110, type: 3}
-  material: {fileID: 2100000, guid: cfd178e1a5d23154c9cb28ed03b0825a, type: 2}
+  portalMesh: {fileID: 4263762089172682282, guid: 0229a2f8bba01f14abf1b86762013775, type: 3}
+  teapotMesh: {fileID: -4041163356895272288, guid: cbf2eef4a0175c94bbd8fc085c2e7110, type: 3}
+  portalMaterial: {fileID: 2100000, guid: 76bfc8976fb624c4a99eb89f27513df2, type: 2}
+  teapotMaterial: {fileID: 2100000, guid: cfd178e1a5d23154c9cb28ed03b0825a, type: 2}

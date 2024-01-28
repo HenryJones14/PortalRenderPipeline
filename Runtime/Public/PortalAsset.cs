@@ -15,10 +15,11 @@ namespace PortalRP
 
 		public Color clearColor = Color.clear;
 
-		public Mesh mesh;
-		public Mesh teapot;
+		public Mesh portalMesh;
+		public Mesh teapotMesh;
 
-        public Material material;
+		public Material portalMaterial;
+		public Material teapotMaterial;
 
 		protected override RenderPipeline CreatePipeline()
 		{

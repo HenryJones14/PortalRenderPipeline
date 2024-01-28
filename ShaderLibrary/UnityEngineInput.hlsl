@@ -1,11 +1,22 @@
 #pragma once
 
-// Random shit
-float4x4 unity_ObjectToWorld;
-float4x4 unity_WorldToObject;
+#if defined(INSTANCING_ON_) // Disabled
 
-#define MATRIX_M unity_ObjectToWorld
-#define MATRIX_I_M unity_WorldToObject
+	float4x4 unity_ObjectToWorldArray[4];
+	float4x4 unity_WorldToObjectArray[4];
+
+	#define MATRIX_M unity_ObjectToWorldArray[unity_InstanceID]
+	#define MATRIX_I_M unity_WorldToObjectArray[unity_InstanceID]
+
+#else
+
+	float4x4 unity_ObjectToWorld;
+	float4x4 unity_WorldToObject;
+
+	#define MATRIX_M unity_ObjectToWorld
+	#define MATRIX_I_M unity_WorldToObject
+
+#endif
 
 #if defined(USING_STEREO_MATRICES)
 

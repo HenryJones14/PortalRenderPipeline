@@ -64,8 +64,11 @@ Shader "PortalRP/StereoEyeIndexColor"
                 unity_InstanceID = unity_BaseInstanceID + (input.instanceID >> 1);
 
                 output.stereoEyeID = unity_StereoEyeIndex;
+                
+                output.pos = mul(MATRIX_M, input.pos);
+                output.pos = mul(MATRIX_V, output.pos);
+                output.pos = mul(MATRIX_P, output.pos);
 
-                output.pos = mul(MATRIX_P, mul(MATRIX_V, mul(MATRIX_M, input.pos)));
                 output.uvs = input.uvs;
 
 
