@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PortalRP.Editor")]
 namespace PortalRP
 {
 	[CreateAssetMenu(menuName = "Rendering/PortalRP/PortalRP Asset", fileName = "PRP_Asset")]
