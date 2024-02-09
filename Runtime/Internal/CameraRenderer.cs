@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
-using System;
 
 namespace PortalRP
 {
@@ -89,7 +88,20 @@ namespace PortalRP
 				// 4 = Near
 				// 5 = Far
 
-				//parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.forward, StaticVariables.bluePortalPosition));
+				Vector3 right = StaticVariables.bluePortalRotation * Vector3.right;
+				Vector3 up = StaticVariables.bluePortalRotation * Vector3.up;
+
+				Vector3 bottomLeft = StaticVariables.bluePortalPosition - up - right;
+				Vector3 bottomRight = StaticVariables.bluePortalPosition - up + right;
+				Vector3 topLeft = StaticVariables.bluePortalPosition + up - right;
+				Vector3 topRight = StaticVariables.bluePortalPosition + up + right;
+
+				parameters.SetCullingPlane(0, new Plane(camera.transform.position, topRight, bottomRight));
+				parameters.SetCullingPlane(1, new Plane(camera.transform.position, bottomLeft, topLeft));
+				parameters.SetCullingPlane(2, new Plane(camera.transform.position, bottomRight, bottomLeft));
+				parameters.SetCullingPlane(3, new Plane(camera.transform.position, topLeft, topRight));
+				parameters.SetCullingPlane(4, new Plane(StaticVariables.bluePortalRotation * Vector3.back, StaticVariables.bluePortalPosition));
+				// Dont need far
 			}
 			else
 			{
